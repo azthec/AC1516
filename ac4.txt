@@ -1,0 +1,168 @@
+1) (cdd ordem pode trocar entre instrucao e posicao na memoria)
+
+add s1 s2 s3    | memoria opcode s2 s3 s1
+sub s1 s2 s3    | memoria opcode s2 s3 s1
+lw  s1 s2 (50)  | memoria opcode s2 s1 50
+bne s1 s2 (100) | memoria opcode s1 s2 25 (100 / 4 pq uma instrucao sao 4, salta 25 instrucoes, salto relativo final da instrucao)
+j 1000          | memoria opcode 250      (1000 / 4 uma instrucao sao 4, salta para a instrucao 250, salto absoluto do inicio do programa)
+addiu s1 s2 100 | memoria opcode 9 s2 s1 100
+
+_________________________________________________________________________________________________________
+
+------8616
+000000 10001 10010 01000 00000 100000
+opcode add | register s1 (17) | register s2 (18) | register t0 (8) | vazio | funct (32)
+
+------8620
+000000 10011 10100 01001 00000 100000
+opcode add | register s3 (19) | register s4 (20) | register t1 (9) | vazio | funct (32)
+
+------8624
+000000 01000 01001 10000 00000 100010
+opcode sub | register t0 (8) | register t1 (9)  | register s0 (16) | vazio | funct (34)
+
+_________________________________________________________________________________________________________
+
+
+------8616
+010011 10011 01000 0000000000100000
+opcode lw  | register s3 (19) | register t0 (8) | constant (32 (com sinal) 16bit)
+
+------8620
+000000 10010 01000 01000 00000 100000
+opcode add | register s2 (18) | register t0 (8) | register t0 (8) | vazio | funct (32)
+
+------8624
+101011 10011 01000 0000000000110000
+opcode sw  | register s3 (19) | register t0 (8) | const (48 (com sinal) 16bit)
+
+_________________________________________________________________________________________________________
+
+
+------8616
+000101 10011 10100 0000000000001000
+opcode bne | register s3 (19) | register s4 (20) | else (8628-8620 = 8 / 4 = 2)
+
+------8620
+000000 10001 10010 10000 00000 100000
+opcode add | register s1 (17) | register s2 (18) | register s0 (16) | vazio | funct (32)
+
+------8624
+000010 000000000000100001101110
+opcode j   | exit (8632 / 4 )
+
+------8628
+000000 10001 10010 10000 00000 100010
+opcode sub | register s1 (17) | register s2 (18) | register s0 (16) | vazio | funct (34)
+
+_________________________________________________________________________________________________________
+
+------3664
+000000 10011 10011 01000 00000 100000
+opcode add | register s3 (19) | register s3 (19) | register t1  (8) | vazio | funct (32)
+
+------3668
+000000 01001 01001 01001 00000 100000
+opcode add | register t1 (9)  | register t1 (9)  | register t1 (9)  | vazio | funct (32)
+
+------3672
+000000 10110 01001 01001 00000 100000
+opcode add | register s6 (22) | register t1 (9)  | register t1 (9)  | vazio | funct (32)
+
+------3676
+010011 01001 01000 01000 0000000000000000
+opcode lw  | register t1 (9)  | register t0 (8)  | const (0 (com sinal) 16 bit)
+
+------3680
+000101 01000 10101 0000000000000010
+opcode bne | register t0 (8)  | register s5 (21) | exit ( 3692 - 3684 = 8 / 4 = 2) 
+
+------3684
+000000 10011 10100 10011 00000 100000
+opcode add | register s3 (19) | register s4 (20) | register s3 (19) | vazio | funct (32)
+
+------3688
+000010 0000000000000001110010100
+opcode j   | 3664 / 4 
+
+------3688
+
+_________________________________________________________________________________________________________
+
+------3664
+001001 11101 11101 0000000000010100
+opcode addiu | register sp (29) | register sp (29) | -12 (unsigned) !(01100) + 1 = 10011 + 1 = 10100
+
+------3668
+101011 11101 01001 0000000000001000
+opcode sw    | register sp (29) | register t1 (9)  | const (8 (com sinal) 16 bit)
+
+------3672
+101011 11101 01000 0000000000000100
+opcode sw    | register sp (29) | register t0 (8)  | const (4 (com sinal) 16 bit)
+
+------3676
+101011 11101 10000 0000000000000000
+opcode sw    | register sp (29) | register s0 (16) | const (0 (com sinal) 16 bit)
+
+------3680
+000000 00100 00101 01000 00000 100000
+opcode add   | register a0 (4)  | register a1 (5)  | register t0 (8)  | vazio | funct (32)
+
+------3684
+000000 00110 00111 01001 00000 100000
+opcode add   | register a2 (6)  | register a3 (7)  | register t1 (9)  | vazio | funct (32)
+
+------3688
+000000 01000 01001 10000 00000 100010
+opcode sub   | register t0 (8)  | register t1 (9)  | register s0 (16) | vazio | funct (34)
+
+------3692
+000000 10000 00000 00010 00000 100000
+opcode add   | register s0 (16) | register zero (0)| register v0 (2)  | vazio | funct (32)
+
+------3696
+010011 11101 10000 0000000000000000
+opcode lw    | register sp (29) | register s0 (16) | const (0)
+
+------3700
+010011 11101 01000 0000000000000100
+opcode lw    | register sp (29) | register t0 (8)  | const (4)
+
+------3704
+010011 11101 01001 0000000000001000
+opcode lw    | register sp (29) | register t1 (9)  | const (8)
+
+------3708
+001001 11101 11101 0000000000001100
+opcode addiu | register sp (29) | register sp (29) | const (12 unsigned = 01100)
+
+------3712
+000000 11111 00000 00000 00000 01000
+opcode jr    | register ra (31) | vazio | vazio | vazio | funct (8)
+
+_________________________________________________________________________________________________________
+
+
+BITS TO INSTRUCTION
+
+000000 01001 01001 11000 10000 100000
+ADD $T8 $S1 $S1
+
+100011 10010 10001 0000000001100100
+LW  $S1 $S2(100)
+
+000100 10001 10010 0000000000011001
+BEQ $S1 $S2 25
+
+000000 11111 00000 00000 00000 001000
+ADD $RA $ZERO $ZERO
+
+000011 00000000000000100111000100
+JAL 10000
+
+
+
+
+
+
